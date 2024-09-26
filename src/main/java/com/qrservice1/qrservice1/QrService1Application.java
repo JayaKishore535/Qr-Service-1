@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 @SpringBootApplication
 public class QrService1Application {
+
     @GetMapping("/message")
     public String message(){
         return " Web application  has ben deployed to azure successfully  !";
