@@ -20,6 +20,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/qr")
 public class QRServiceController {
+
     @GetMapping("/message")
     public String message(){
         return " Web application  has ben deployed to azure successfully  !";
