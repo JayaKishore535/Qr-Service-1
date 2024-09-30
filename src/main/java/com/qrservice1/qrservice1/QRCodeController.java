@@ -1,31 +1,34 @@
 package com.qrservice1.qrservice1;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Base64;
+
 @RestController
 public class QRCodeController {
 
-    private static final String QR_CODE_IMAGE_PATH = "./src/main/resources/QRCode.png";
-
-
-    @GetMapping(value = "/genrateAndDownloadQRCode/{codeText}/{width}/{height}")
-    public void download(
+    @GetMapping(value = "/generateQRCode/{codeText}/{width}/{height}")
+    public ResponseEntity<String> generateQRCode(
             @PathVariable("codeText") String codeText,
             @PathVariable("width") Integer width,
-            @PathVariable("height") Integer height)
-            throws Exception {
-        QRCodeGenerator.generateQRCodeImage(codeText, width, height, QR_CODE_IMAGE_PATH);
-    }
+            @PathVariable("height") Integer height) {
+        try {
+            if (width <= 0 || height <= 0) {
+                return ResponseEntity.badRequest().body("Width and height must be positive integers.");
+            }
 
-    @GetMapping(value = "/genrateQRCode/{codeText}/{width}/{height}")
-    public ResponseEntity<byte[]> generateQRCode(
-            @PathVariable("codeText") String codeText,
-            @PathVariable("width") Integer width,
-            @PathVariable("height") Integer height)
-            throws Exception {
-        return ResponseEntity.status(HttpStatus.OK).body(QRCodeGenerator.getQRCodeImage(codeText, width, height));
+            byte[] qrCodeImage = QRCodeGenerator.getQRCodeImage(codeText, width, height);
+            String base64Image = Base64.getEncoder().encodeToString(qrCodeImage);
+            String imgTag = "<img src='data:image/png;base64," + base64Image + "' alt='QR Code'/>";
+
+            return ResponseEntity.status(HttpStatus.OK).body(imgTag);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error generating QR Code: " + e.getMessage());
+        }
     }
 }
